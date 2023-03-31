@@ -1,0 +1,69 @@
+/* This app script is modified from Rock & Abi by GOD1@CKY for report generating
+// Inspired by Abi, follow him on Twitter: https://twitter.com/_abi_
+// Base GPT3.5 Script Modified by Rock, follow him on Twitter: https://twitter.com/rocktrembath
+
+ * Setup Variables 
+ * 1) Paste in Your Open AI Secret Key on the sheet H1 cell
+ * 2) Adjust the Maximum Tokens to Process
+ */
+
+
+function getSecretKey() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("DemoGPT3.5Turbo");
+  var secretKeyCell = sheet.getRange("H1");
+  return secretKeyCell.getValue();
+}
+
+const SECRET_KEY = getSecretKey();
+const MAX_TOKENS = 400;
+
+
+
+
+
+/**
+ * Completes your prompt with GPT-3
+ *
+ * @param {string} userprompt Prompt
+ * @param {string} userrole Set to User to instruct it for User input
+ * @param {number} temperature (Optional) Temperature. 2 is super creative while 0 is very exact and precise. Defaults to 0.5.
+ * @param {string} model (Optional) ChatGPT Model to use. Defaults to "gpt-3.5-turbo".
+ * @return Completion returned by ChatGPT
+ * @customfunction
+ */
+
+  function gpt(userprompt, userrole = "user", temperature = 0.5, model = "gpt-3.5-turbo") {
+
+    // Create the array for the Chat prompt
+    // More info: https://platform.openai.com/docs/guides/chat/introduction
+
+    const gptprompt = [
+        {role : userrole, content : userprompt},
+    ];
+
+
+  // Create API Requests
+
+    const url = "https://api.openai.com/v1/chat/completions";
+    const payload = {
+      model: model,
+      messages: gptprompt,
+      temperature: temperature,
+      max_tokens: MAX_TOKENS,
+    };
+
+    const options = {
+      contentType: "application/json",
+      headers: { Authorization: "Bearer " + SECRET_KEY },
+      payload: JSON.stringify(payload),
+    };
+
+    const results = JSON.parse(UrlFetchApp.fetch(url, options).getContentText());
+    
+    // Return results from call - for more info on the structure returned see the documentation:
+    // https://platform.openai.com/docs/api-reference/chat/create
+
+    return results.choices[0].message.content.trim();
+
+
+  }
